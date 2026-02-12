@@ -4,53 +4,11 @@ from langgraph_supervisor import create_supervisor
 from langchain.chat_models import init_chat_model
 from langchain.tools import tool
 from langgraph.checkpoint.memory import InMemorySaver
-import speech_recognition as speech_to_text
-from TTS.api import TTS as TextToSpeech
-import sounddevice as sd
+
+checkpointer = InMemorySaver()
 
 # custom imports
 from print_messages import pretty_print_messages
-
-checkpointer = InMemorySaver() # short term memory for conversation state
-
-# Initialize recognizer and TTS engine
-recognizer = speech_to_text.Recognizer()
-speaker = TextToSpeech(model_name="tts_models/en/ljspeech/tacotron2-DDC", progress_bar=False, gpu=False)
-
-print(sd.query_devices())
-print("Default output device:", sd.default.device)
-
-def speak_text(text: str):
-    """
-    Speaks the given text using Coqui TTS with in-memory playback.
-    """
-    if not text.strip():
-        return  # Skip empty messages
-
-    try:
-        print(f"[Assistant]: {text}")
-        audio = speaker.tts(text)           # Synthesizes to a NumPy array
-        sd.play(audio, samplerate=22050)      # Play audio
-        sd.wait()                             # Wait until done
-    except Exception as e:
-        print(f"Error during text to speech generation: {e}")
-
-def get_speech_input(prompt="You: "):
-    with speech_to_text.Microphone() as source:
-        print(prompt)
-        audio = recognizer.listen(source)
-    try:
-        text = recognizer.recognize_google(audio)
-        print(f"Speech to text recognized text: '{text}'")
-        return text.strip()
-    except speech_to_text.UnknownValueError:
-        print("Speech to text could not understand the audio.")
-        return ""
-    except speech_to_text.RequestError as e:
-        print(f"Speech to text request error: {e}")
-        return ""
-
-speak_text("Welcome to EVANA, your emergency assistant. Please describe your situation or say 'help' to begin.")
 
 model = None
 if not os.environ.get("OPENAI_API_KEY"):
@@ -147,7 +105,6 @@ if not initial_input:
 # First response from supervisor
 for chunk in supervisor.stream({"messages": [{"role": "user", "content": initial_input}]}, {"configurable": {"thread_id": "1"}},):
     pretty_print_messages(chunk)
-    # speak_text(message)
 
 # Start interactive loop
 while True:
@@ -159,7 +116,6 @@ while True:
 
         for chunk in supervisor.stream({"messages": [{"role": "user", "content": user_input}]}, {"configurable": {"thread_id": "1"}},):
             pretty_print_messages(chunk)
-            # speak_text(message)
 
     except KeyboardInterrupt:
         print("\nConversation ended.")

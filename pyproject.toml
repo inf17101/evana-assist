@@ -14,7 +14,4 @@ dependencies = [
     "transformers",
     "accelerate",
     "scipy",
-    "SpeechRecognition",
-    "sounddevice",
-    "TTS",
 ]
