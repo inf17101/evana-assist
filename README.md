@@ -1,4 +1,4 @@
-# EVANA - Emergency Vehicle Assistant for Navigating Accidents
+# EVANA - Emergency Virtual Assistant for Navigation & Aid
 
 ## Background
 
