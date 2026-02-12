@@ -42,6 +42,7 @@ This project implements EVANA as an agentic AI assistant using **LangGraph** wit
 ## Running the Project
 
 ```bash
+export OPENAI_API_KEY=your_openai_api_key_here
 uv run main.py
 ```
 
